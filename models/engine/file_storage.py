@@ -30,7 +30,7 @@ class FileStorage:
                 cls = eval(cls)
             cls_dict = {}
             for k, v in self.__objects.items():
-                if isinstance(v, cls):
+                if isinstance(v, cls) or v.__class__ is cls:
                     cls_dict[k] = v
             return cls_dict
         return self.__objects
