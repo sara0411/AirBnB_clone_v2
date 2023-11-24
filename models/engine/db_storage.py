@@ -12,7 +12,7 @@ from models.user import User
 from sqlalchemy import create_engine
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import scoped_session
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm.session import sessionmaker, Session
 
 
 class DBStorage:
@@ -27,13 +27,15 @@ class DBStorage:
 
     def __init__(self):
         """Initialize a new DBStorage instance."""
-        self.__engine = create_engine("mysql+mysqldb://{}:{}@{}/{}".
-                                      format(getenv("HBNB_MYSQL_USER"),
-                                             getenv("HBNB_MYSQL_PWD"),
-                                             getenv("HBNB_MYSQL_HOST"),
-                                             getenv("HBNB_MYSQL_DB")),
+        user = getenv("HBNB_MYSQL_USER")
+        pwd = getenv("HBNB_MYSQL_PWD")
+        host = getenv("HBNB_MYSQL_HOST", default = "localhost")
+        db = getenv("HBNB_MYSQL_DB")
+        env = getenv("HBNB_ENV")
+        self.__engine = create_engine("mysql+mysqldb://{}:{}@{}/:3306/{}".
+                                      format(user, pwd, host, db),
                                       pool_pre_ping=True)
-        if getenv("HBNB_ENV") == "test":
+        if env == "test":
             Base.metadata.drop_all(self.__engine)
 
     def all(self, cls=None):
@@ -78,4 +80,4 @@ class DBStorage:
 
     def close(self):
         """Close the working SQLAlchemy session."""
-        self.__session.close()
+        self.__session.remove()
